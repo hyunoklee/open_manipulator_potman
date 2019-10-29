@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="papercup">
+    <static>false</static>
+    <link name="link">
+      <inertial>
+        <mass>0.010</mass>
+        <inertia>
+          <ixx>4.7583e-005</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.7583e-005</iyy>
+          <iyz>0</iyz>
+          <izz>3.1250e-006</izz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <pose>0.01 -0.039 0.022 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.015</radius>
+            <length>0.045</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://papercup/meshes/papercup.dae</uri>
+	    <!--<scale>0.35 0.35 0.35</scale>-->
+	    <scale>0.17 0.17 0.17</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>

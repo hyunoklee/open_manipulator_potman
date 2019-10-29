@@ -1,0 +1,70 @@
+***실행 명령어  
+roslaunch open_manipulator_controller open_manipulator_controller.launch
+roslaunch open_manipulator_potman yolo.launch camera_model:=realsense_d435
+roslaunch open_manipulator_potman potman.launch
+roslaunch open_manipulator_potman key_command.launch
+
+***실행 명령어 ( 시뮬레이션 가제보 )
+roslaunch open_manipulator_gazebo open_manipulator_gazebo_potman.launch  
+roslaunch open_manipulator_controller open_manipulator_controller.launch use_platform:=false
+roslaunch open_manipulator_potman yolo_jsk_pose.launch camera_model:=realsense_d435 use_platform:=false
+roslaunch open_manipulator_potman potman.launch
+roslaunch open_manipulator_potman key_command.launch
+echo로 메뉴얼 선택 주는 방법 
+pub command_Key std_msgs/Int8 2
+
+***설치 과정
+1. OpenManipulator 설치
+http://emanual.robotis.com/docs/en/platform/openmanipulator_x/ros_setup/#install-ubuntu-on-pc
+2. Darknet ROS 설치 
+그냥 일반 Darknet ROS 써도 될것 같은데 현재는 아래처럼 darknet ros 변형시켜서 사용 
+2-1. 정식 버전 아닌 JSK 와 연동되는 부분 추가된 Darknet ROS에 
+    git clone --recursive https://github.com/Affonso-Gui/darknet_ros.git
+2-2. 여기서 Cup과 Glass만 publish하게 수정, 물체의 거리 depth 값도 같이 publish하게 수정, 인식 잘되게 하기 위헤 threshold 값 낮춤 
+    위 깃에서 다운받은 부분에서 external code 폴더에 있는 darknet_ros 에 있는 code 덮어쓰면 됨  
+
+***Start Pour Mode에서 사용할 open_manipulator_potman/cfg/output.txt 파일 만드는 방법
+1. OpenManipulator application git 설치 
+git clone https://github.com/ROBOTIS-GIT/open_manipulator_applications.git
+2. 위 깃에서 다운받은 부분에서 external code 폴더에 있는 open_manipulator_applications에 있는 code 덮어쓰면 됨  
+3. 그리고 open_manipulator_applications/open_manipulator_master_slave/src/open_manipulator_master.cpp 파일의 
+   std::ofstream outFile("/home/hyunoklee/output.txt"); 부분 자시의 피씨 경로에 맞게 저장 
+4. 실행 
+   roslaunch open_manipulator_master_slave open_manipulator_master.launch usb_port:=/dev/ttyUSB0
+5. 화면에 나온데로 2번 누르면 저장시작, 3번 누르면 저장 완료 다름 매뉴는 정상 동작하지 않음 
+6. 만들어진 파일(output.txt) open_manipulator_potman 의 cfg 로 이동 
+
+////////open manipulator control  ////////// 
+op 추락 방지 Code 임, open manipulator control 패키지 실행 실수로 종료할 때 토크가 빠져 추락하는 부분을 방지하기 위해 
+open_manipulator_controller.cpp 부분에 종료시 바닦으로 천천히 내려간 다음 토크를 disable 하는 형태로 바꾸었음. 
+종료시 토크를 disable 안하게 바꾸니 다음에 켤때 문제가 생겨 이와 같은 방법으로 수정함. 아래 위치에 수정한 파일 있음.  
+external code/open_manipulator/open_manipulator_controller/src$ ls
+open_manipulator_controller.cpp
+하지만 팔을 내려놔야하는 바닦지점이 개인마다 틀릴것이라 해당 파일에서 종료할 joint 지점을 자진의 환경에 맞게 수정해서 써야함.  
+OpenManipulatorController::~OpenManipulatorController() 함수의 아래 부분 값 자신에 맞게 수정 
+  target_angle.push_back(0.003); 
+  target_angle.push_back(0.400);
+  target_angle.push_back(-0.087);
+  target_angle.push_back(0.991);
+
+
+////////구동만 하려면 아래 부분은 읽을 필요 없음.  ////////// 
+
+jsk를 이용한 Object TF를 RVIZ에서 보려면 아래 명령어 사용 ( 오차가 많아서 실제 Action에 사용하지 않음 )
+
+roslaunch open_manipulator_controller open_manipulator_controller.launch
+roslaunch open_manipulator_potman yolo_jsk_pose.launch camera_model:=realsense_d435
+roslaunch open_manipulator_potman potman.launch
+roslaunch open_manipulator_potman key_command.launch
+ 
+3. JSK 설치 필요 
+실제 동작에는 사용되지 않는 패키지.임 아래 필요없는 패키지도 있는것 같은데 구분이 잘 되지 않음. 
+$git clone https://github.com/jsk-ros-pkg/jsk_common.git
+$cd ~/catkin_ws && catkin_make
+$sudo apt-get install ros-kinetic-jsk-recognition
+$sudo apt-get install ros-kinetic-libsiftfast
+$sudo apt-get install ros-kinetic-laser-assembler
+$sudo apt-get install ros-kinetic-octomap-server
+$sudo apt-get install ros-kinetic-nodelet
+$sudo apt-get install ros-kinetic-depth-image-proc
+$sudo apt-get install ros-kinetic-jsk-topic-tools

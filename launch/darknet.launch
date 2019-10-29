@@ -1,0 +1,25 @@
+<launch>
+  <arg name="use_zed"               default="true"   doc="Set to false when using Intel Realsense D435"/>  
+  <arg name="generate_point_cloud"  default="false"  doc="Generate point cloud from input_image and input_depth"/>
+  <arg name="darknet_config"        default="$(find open_manipulator_potman)/cfg/darknet_config.yaml"/>
+
+  <!-- TOPICS -->
+  <arg     if="$(arg use_zed)" name="input_image"        default="/stereo_camera/left/image_rect_color"/>
+  <arg unless="$(arg use_zed)" name="input_image"        default="/camera/color/image_rect_color"/>
+  <arg     if="$(arg use_zed)" name="input_depth"        default="/stereo_camera/depth/depth_registered"/>
+  <arg unless="$(arg use_zed)" name="input_depth"        default="/camera/depth/image_rect_raw"/>
+  <arg     if="$(arg use_zed)" name="input_camera_info"  default="/stereo_camera/left/camera_info"/>
+  <arg unless="$(arg use_zed)" name="input_camera_info"  default="/camera/color/camera_info"/>
+  <arg     if="$(arg use_zed)" name="point_cloud_topic"  default="/stereo_camera/point_cloud/cloud_registered"/>
+  <arg unless="$(arg use_zed)" name="point_cloud_topic"  default="/camera/depth_registered/points"/>
+
+  <!-- DETECTION -->
+  <param name="/darknet_ros/subscribers/camera_reading/topic"      value="$(arg input_image)"/>
+  <param name="/darknet_ros/subscribers/camera_reading/queue_size" value="1"/>
+  <include file="$(find darknet_ros)/launch/darknet_ros.launch">
+    <arg name="ros_config" value="$(arg darknet_config)"/>
+  </include>
+
+  <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find open_manipulator_potman)/rviz/yolo_depth.rviz"/>
+
+</launch>

@@ -1,0 +1,60 @@
+apk 폴더를 보며 android_pubsubSample.apk 과 facetracking.apk 파일 두개가 있습니다. 
+
+facetracking.apk 은 구글 공식 얼굴 트레킹 코드이고 여기서 브로드 캐스트로 android_pubsubSample.apk 으로 디텍트한 정보를 보내줌. 
+https://github.com/googlesamples/android-vision/tree/master/visionSamples/FaceTracker  원본 code 
+
+android_pubsubSample.apk 은 ros android 쪽을 수정한 예제로  facetracking.apk 에서 브로드 캐스트한 디텍드 정보를 PC로 ros publish 해줌. 
+해당앱은 휴대폰 연동에도 쓰이지만 술친구 Control 하는데도 같이 사용될수 있도록 만들었음.   
+
+https://github.com/AuTURBO/ros-app-tb3-voiceorder   -> 원본 code 
+
+사용법은 아래 순서를 따르세요. 
+
+1. PC와 휴대폰을 동일 공유기에 연결
+2. PC쪽 roscore IP 설정 
+3. 휴대폰에 두개 apk (android_pubsubSample.apk 과 facetracking.apk) 설치
+4. android_pubsubSample.apk APK 실행, 실행시 2번의 roscore IP 입력 
+   술친구의 경우 그대로 써서 op 컨트롤 하면 됨 
+   휴대폰 연동의 경우 홈키를 눌러 해당 apk를 background에서 실행 되게 함. 
+5. facetracking.apk 실행 
+   그러면 얼굴인식 data가 facetracking.apk  ->  android_pubsubSample.apk 거쳐 PC서 보여짐. 
+6. PC 서 rqt로 로스 topic을 보시면 휴대폰(android_pubsubSample.apk)에서 아래 3개의 topic을 publish 하고 있음. 
+
+   /android/publish_voice_string/recognizer/output   -> 음성 인식한 data ( 한글이라 rqt 에서 읽을 수 없음. ) 
+   /command_Key   -> 술친구 Control에 사용되는 data 
+   /facedetectdataset  -> face detection  정보 
+
+7. /facedetectdataset 의 정보 내용.
+   data가 String으로 오는데 아래 순서로 정보를 담고 있습니다.   
+   id,CenterX,CenterY,Width,Height,EulerY,EulerZ,LeftEyeOpen,RightEyeOpen,Smile
+   각인자들 성명 
+id,감지중인 얼굴 아이디 
+   ( 얼굴이 여러개 있으면 이게 여러개 발생함. 하나있더라도 id 가 변경하는 경우가 있으므로 Demo 시에는 
+     얼굴 한개만 있게해고 id는 보지않고 무조건 Tracking 하는 것이 좋을 것 같음 )
+CenterX, 얼굴의 카메라 화면상 X 좌표 ( 시작점, 끝점이 휴대폰 마다 틀릴수 있으므로 자신의 폰에서 test를 해보고 시작점, 끝점을 감지해야함. )
+CenterY, 얼굴의 카메라 화면상  y 좌표 ( 시작점, 끝점이 휴대폰 마다 틀릴수 있으므로 자신의 폰에서 test를 해보고 시작점, 끝점을 감지해야함. )
+Width, 얼굴 가로 길이
+Height,얼굴 세로 길이
+EulerY,얼굴이 오른쪽 왼쪽으로 기울어진 각도 
+EulerZ,얼굴이 아래 위로 기울어진 각도  
+LeftEyeOpen,왼쪽 눈을 뜨고 있을 확률
+RightEyeOpen, 오른쪽 눈은 뜨고 있을 확률
+Smile, 웃고 있을 확률   
+외에 landmark 도 data가 있지만 이건 data가 heavy 하고 안쓸것 같아 보내지 않았습니다. 
+위에서 필요한 데이타 골라 사용하면 될듯 합니다 ㅎ 
+
+8. android_pubsubSample.apk 앱 단독으로 술친구를 Control 할수 있는데 
+음성인식의 경우 외부망에 연결이 되어있어야 동작을 하므로 라우터가 인터넷에 연결이 되어있어야함. 
+음성인식의 경우 단어0에 있는 단어중 하나가 포함된 말을 하면 0번 버튼을 누른것 처럼 (술을 따르는) 모드로 동작   
+음성인식의 경우 단어1에 있는 단어중 하나가 포함된 말을 하면 1번 버튼을 누른것 처럼 (잔을 보고 건배하는 ) 모드로 동작   
+음성인식의 경우 단어2에 있는 단어중 하나가 포함된 말을 하면 2번 버튼을 누른것 처럼 (잔을 내려 놓는) 모드로 동작   
+하게 되어있습니다. 
+
+  단어0 {  "줘봐", "주세요","줄래", "비었" ,"따라" } ;
+  단어1 { "브라보" , "건배", "짠" } ;
+  단어2 { "내려", "놓으세요", "놔둬"} ;
+
+   
+
+   
+   
